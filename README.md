@@ -4,6 +4,10 @@ Aplicación de ecommerce desarrollada con React. Permite explorar productos, fil
 
 El proyecto fue creado como práctica para consolidar conocimientos de React y consumo de APIs desarrolladas con Python/FastAPI.
 
+## Demo
+
+Podés probar la aplicación publicada en Vercel: [JD Ecommerce](https://ecommerce-frontend-theta-teal-23.vercel.app/).
+
 ## Tecnologías
 
 - React 19 y Vite
