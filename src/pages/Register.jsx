@@ -10,9 +10,8 @@ import { Link } from 'react-router-dom';
 import "../styles/pages/Auth.css";
 
 
-// 4-24 caracteres.
-// Debe comenzar con una letra.
-// Se permiten letras, números, _ y -
+// Reglas de formato visibles antes de enviar la petición. El backend repite
+// estas validaciones: el frontend solo mejora la experiencia de uso.
 const USER_REGEX = /^[A-Za-z][A-Za-z0-9_-]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,24}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -31,12 +30,11 @@ export const Register = () => {
 
   const handleChange = (e) => {
     const {name, value} = e.target
-    
 
-    setFormData({
-      ...formData,
+    setFormData(currentForm => ({
+      ...currentForm,
       [name]:value
-    })
+    }))
   }
   const handleSubmit = async (e) => {
     setError("");
@@ -46,6 +44,7 @@ export const Register = () => {
     const {username, email, password} = formData
     
 
+    // Evita una petición innecesaria cuando falta información obligatoria.
     if (!username || !email || !password) {
       setLoading(false);
       setError('Debes completar todos los campos')
@@ -72,6 +71,8 @@ export const Register = () => {
   setLoading(true)
   
   try {
+        // El registro no inicia sesión automáticamente: confirma el resultado
+        // con un modal y luego lleva al usuario al flujo de login.
         await register(formData);
         setError("")
         setSuccess("Usuario registrado correctamente.")
@@ -91,6 +92,7 @@ export const Register = () => {
   }
 
   const handleSuccessClose = () => {
+    // La redirección ocurre al cerrar el modal para que el usuario alcance a leerlo.
     setSuccess("");
     navigate("/login");
   };

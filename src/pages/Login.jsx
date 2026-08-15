@@ -16,30 +16,31 @@ export const Login = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Inputs controlados: React mantiene una única fuente de verdad del formulario.
   const [formData, setFormData] = useState({
     email:"",
     password:""
   })
 
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
     const {name, value} = e.target
-    setFormData({
-      ...formData,
+    setFormData(currentForm => ({
+      ...currentForm,
       [name]:value
-    })
+    }))
   }
 
   const handleSubmit =  async(e)=> {
     setError("");
-    setSuccess("");
     e.preventDefault();
 
     const { email, password } = formData;
     
+    // Esta validación rápida mejora la experiencia; el backend sigue siendo
+    // quien valida definitivamente las credenciales.
     if (!email || !password) {
       setError("Debes completar todos los campos.");
     return;
@@ -48,24 +49,26 @@ export const Login = () => {
     setLoading(true)
 
     try {
+      // El login devuelve tokens. Luego pedimos /user/me para obtener el usuario
+      // completo, incluido su rol, que determina las rutas que puede ver.
       const response = await login(formData);
       const accessToken = response.data.access_token;
       const refreshToken = response.data.refresh_token;
       const userResponse = await getCurrentUser(accessToken);
       
+      // AuthContext guarda la sesión globalmente y la sincroniza con localStorage.
       setAuth({
           user: userResponse.data,
           accessToken: accessToken,
           refreshToken: refreshToken
       });
+      // ProtectedRoute conserva la URL original en `from` antes de redirigir al login.
       navigate(location.state?.from || "/", { replace: true });
-      setSuccess("Inicio de sesión correcto.");
       setFormData({
         email: "",
         password: ""
       });
     } catch (error) {
-        setSuccess("")
         setError(getErrorMessage(error, "No se pudo iniciar sesión."));
     } finally {
       setLoading(false)
@@ -89,7 +92,6 @@ export const Login = () => {
             <Form.Control type="password" placeholder="Contraseña" name='password' value={formData.password} onChange={handleChange}/>
           </Form.Group>
           {error && <p className="text-danger">{error}</p>}
-          {success && <p className="text-success">{success}</p>}
           <Button variant="success" type="submit" disabled={loading}>
             {loading ? "Iniciando" : "Iniciar Sesion" } 
           </Button>

@@ -28,6 +28,8 @@ api.interceptors.request.use(config => {
     const alreadyHasToken = Boolean(config.headers.Authorization);
 
     if (storedAuth?.accessToken && !alreadyHasToken) {
+        // Agrega la credencial a toda petición privada sin repetir este código
+        // en cada servicio. No pisa un token enviado explícitamente.
         config.headers.Authorization = `Bearer ${storedAuth.accessToken}`;
     }
 
@@ -63,6 +65,8 @@ api.interceptors.response.use(
 
         try {
             if (!refreshPromise) {
+                // Varias peticiones pueden fallar a la vez con 401. Compartir la
+                // misma promesa evita enviar varias renovaciones en paralelo.
                 refreshPromise = axios
                     .post(`${API_URL}/user/refresh`, {
                         refresh_token: storedAuth.refreshToken
@@ -89,6 +93,7 @@ api.interceptors.response.use(
             originalRequest.headers.Authorization =
                 `Bearer ${newAccessToken}`;
 
+            // Reintenta una sola vez la petición original con el token renovado.
             return api(originalRequest);
         } catch (refreshError) {
             localStorage.removeItem("auth");
