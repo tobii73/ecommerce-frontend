@@ -18,6 +18,9 @@ export const AppNavbar = () => {
     const {cart, setCart} = useContext(CartContext);
     const { auth, logout } = useContext(AuthContext);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+    const [expanded, setExpanded] = useState(false);
+
+    const closeMenu = () => setExpanded(false);
 
     const handleLogout = () => {
         setCart([]);
@@ -31,56 +34,61 @@ export const AppNavbar = () => {
     );
 
     return (
-        <Navbar className="app-navbar" data-bs-theme="dark">
+        <Navbar
+            className="app-navbar"
+            data-bs-theme="dark"
+            expand="lg"
+            expanded={expanded}
+            onToggle={setExpanded}
+            collapseOnSelect
+        >
             <Container>
 
-                <Navbar.Brand as={Link} to="/">
+                <Navbar.Brand as={Link} to="/" onClick={closeMenu}>
                     <BrandLogo />
                 </Navbar.Brand>
 
-                <Nav className="me-auto">
+                <Navbar.Collapse id="app-navbar-navigation" className="app-navbar__collapse">
+                <Nav className="me-auto app-navbar__links">
 
-                    <Nav.Link as={Link} to="/">
+                    <Nav.Link as={Link} to="/" onClick={closeMenu}>
                         Inicio
                     </Nav.Link>
 
                     {auth.user && auth.accessToken && (
                         <>
-                            <Nav.Link as={Link} to="/business">
+                            <Nav.Link as={Link} to="/business" onClick={closeMenu}>
                                 Negocios
                             </Nav.Link>
 
-                            <Nav.Link as={Link} to="/orders/my-orders">
+                            <Nav.Link as={Link} to="/orders/my-orders" onClick={closeMenu}>
                                 Mis pedidos
                             </Nav.Link>
 
                             {auth.user.role === "seller" && (
-                                <Nav.Link as={Link} to="/products">
+                                <Nav.Link as={Link} to="/products" onClick={closeMenu}>
                                     Productos
                                 </Nav.Link>
                             )}
 
                             {auth.user.role === "admin" && (
-                                <Nav.Link as={Link} to="/admin">
+                                <Nav.Link as={Link} to="/admin" onClick={closeMenu}>
                                     Admin
                                 </Nav.Link>
                             )}
                         </>
                     )}
-                    <Nav.Link as={Link} to="/cart" className="app-navbar__cart-link" aria-label="Ir al carrito">
-                        <FontAwesomeIcon icon={faCartShopping} />
-                        <Badge className="app-navbar__cart-badge" bg="light" text="dark">
-                            {cartQuantity}
-                        </Badge>
-                    </Nav.Link>
                 </Nav>
-                
 
+                <div className="app-navbar__session-actions">
                 {auth.user && auth.accessToken ? (
 
                     <Button
                         variant="outline-light"
-                        onClick={() => setShowLogoutConfirm(true)}
+                        onClick={() => {
+                            closeMenu();
+                            setShowLogoutConfirm(true);
+                        }}
                     >
                         Cerrar sesión
                     </Button>
@@ -93,6 +101,7 @@ export const AppNavbar = () => {
                             as={Link}
                             to="/login"
                             variant="outline-light"
+                            onClick={closeMenu}
                         >
                             Iniciar sesión
                         </Button>
@@ -101,6 +110,7 @@ export const AppNavbar = () => {
                             as={Link}
                             to="/register"
                             variant="light"
+                            onClick={closeMenu}
                         >
                             Registrarse
                         </Button>
@@ -108,6 +118,23 @@ export const AppNavbar = () => {
                     </div>
 
                 )}
+                </div>
+                </Navbar.Collapse>
+
+                <Nav className="app-navbar__cart-nav">
+                    <Nav.Link as={Link} to="/cart" className="app-navbar__cart-link" aria-label="Ir al carrito">
+                        <FontAwesomeIcon icon={faCartShopping} />
+                        <Badge className="app-navbar__cart-badge" bg="light" text="dark">
+                            {cartQuantity}
+                        </Badge>
+                    </Nav.Link>
+                </Nav>
+
+                <Navbar.Toggle
+                    className="app-navbar__toggle"
+                    aria-controls="app-navbar-navigation"
+                    aria-label="Abrir menú de navegación"
+                />
 
             </Container>
             <Modal
